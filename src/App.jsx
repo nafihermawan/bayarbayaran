@@ -105,7 +105,7 @@ function App() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <div className="sticky top-0 bg-gray-50 z-10 pt-4 pb-2 shadow-sm">
-        <h1 className="text-3xl font-bold text-center text-indigo-600 mb-1">BayarBayaran 🍽️</h1>
+        <h1 className="text-3xl font-bold text-center text-indigo-600 mb-1">BayarBayaran</h1>
         <p className="text-xs italic text-center text-gray-500 max-w-xs mx-auto leading-tight">
           “Semua dosa orang yang mati syahid diampuni kecuali hutang” (HR. Muslim no. 1886)
         </p>
