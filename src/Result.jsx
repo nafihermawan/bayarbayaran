@@ -10,76 +10,91 @@ function Result() {
     if (stored) {
       setData(JSON.parse(stored));
     } else {
-      navigate('/'); // Redirect ke home jika tidak ada data
+      navigate('/');
     }
-  }, []);
-
-  const hitungTotalPesanan = (pesanan) =>
-    pesanan.reduce((total, item) => total + item.harga, 0);
+  }, [navigate]);
 
   if (!data) return null;
 
-  const { peserta, pajak, biayaTambahan } = data;
-  const totalPesanan = peserta.reduce(
-    (sum, p) => sum + hitungTotalPesanan(p.pesanan),
-    0
-  );
-  const persenPajak = parseFloat(pajak) || 0;
-  const biayaLain = parseFloat(biayaTambahan) || 0;
-  const totalAkhir = totalPesanan + (totalPesanan * persenPajak) / 100 + biayaLain;
-
-  const totalPerPeserta = peserta.map((p) => {
-    const subtotal = hitungTotalPesanan(p.pesanan);
-    const proporsi = subtotal / totalPesanan;
-    const totalHarusBayar = proporsi * totalAkhir;
-    return {
-      nama: p.nama,
-      pesanan: p.pesanan,
-      subtotal,
-      harusBayar: Math.round(totalHarusBayar),
-    };
-  });
+  const totalPesanan = data.peserta.reduce((sum, p) => sum + p.rincian.menu, 0);
+  const totalPajak = data.peserta.reduce((sum, p) => sum + p.rincian.pajak, 0);
+  const totalBiaya = data.peserta.reduce((sum, p) => sum + p.rincian.biaya, 0);
+  const totalKeseluruhan = data.peserta.reduce((sum, p) => sum + p.total, 0);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <h1 className="text-2xl font-bold text-center text-indigo-600 mb-6">Hasil Pembagian</h1>
+    <div className="min-h-screen bg-white py-6 px-4 text-gray-800">
+      <h1 className="text-3xl font-bold text-center text-indigo-600 mb-6">Hasil Split Bill</h1>
 
-      <div className="max-w-md mx-auto bg-white p-4 rounded-xl shadow mb-4">
-        <p>Total pesanan: <strong>Rp{totalPesanan.toLocaleString()}</strong></p>
-        <p>Pajak: <strong>{persenPajak}%</strong></p>
-        <p>Biaya tambahan: <strong>Rp{biayaLain.toLocaleString()}</strong></p>
-        <p className="mt-2 border-t pt-2">Total akhir: <strong className="text-green-600">Rp{Math.round(totalAkhir).toLocaleString()}</strong></p>
-      </div>
+      <div className="max-w-md mx-auto">
+        {/* Ringkasan Total di atas */}
+        <div className="text-sm bg-yellow-50 border border-yellow-200 rounded-xl p-4 shadow-inner mb-6">
+          <div className="flex justify-between mb-1">
+            <span>Total pesanan</span>
+            <strong>Rp{totalPesanan.toLocaleString()}</strong>
+          </div>
+          <div className="flex justify-between mb-1">
+            <span>Pajak</span>
+            <strong>{data.pajak}% (Rp{totalPajak.toLocaleString()})</strong>
+          </div>
+          <div className="flex justify-between mb-1">
+            <span>Biaya tambahan</span>
+            <strong>Rp{totalBiaya.toLocaleString()}</strong>
+          </div>
+          <hr className="my-2 border-t border-yellow-300" />
+          <div className="flex justify-between mt-2 font-semibold">
+            <span>Total akhir</span>
+            <strong>Rp{totalKeseluruhan.toLocaleString()}</strong>
+          </div>
+        </div>
 
-      {totalPerPeserta.map((p, idx) => (
-        <div key={idx} className="max-w-md mx-auto bg-white p-4 rounded-xl shadow mb-4">
-          <h2 className="font-semibold text-indigo-700 mb-2">{p.nama}</h2>
-          {p.pesanan.length > 0 ? (
-            <ul className="text-sm text-gray-800 mb-2 list-disc list-inside">
-              {p.pesanan.map((item, i) => (
-                <li key={i}>
-                  {item.namaMenu} - Rp{item.harga.toLocaleString()}
+        {data.peserta.map((p, i) => (
+          <div
+            key={i}
+            className="bg-white border border-gray-200 rounded-xl p-4 mb-4 shadow-sm"
+          >
+            <h2 className="text-lg font-semibold mb-1 text-indigo-700">{p.nama}</h2>
+            <hr className="mb-3 border-t border-gray-200" />
+            <ul className="text-sm text-gray-700 mb-3 space-y-1">
+              {p.pesanan.map((menu, idx) => (
+                <li key={idx}>
+                  • {menu.namaMenu} – Rp{menu.harga.toLocaleString()}
                 </li>
               ))}
             </ul>
-          ) : (
-            <p className="text-sm text-gray-500 mb-2">Tidak ada pesanan</p>
-          )}
-          <p>Subtotal: Rp{p.subtotal.toLocaleString()}</p>
-          <p className="font-bold text-green-700">
-            Harus bayar: Rp{p.harusbBayar?.toLocaleString() ?? p.harusbBayar}
-          </p>
-        </div>
-      ))}
+            <div className="text-sm text-gray-700 space-y-1">
+              <div className="flex justify-between">
+                <span>Subtotal</span>
+                <span>Rp{p.rincian.menu.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Pajak</span>
+                <span>Rp{p.rincian.pajak.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Biaya Tambahan</span>
+                <span>Rp{p.rincian.biaya.toLocaleString()}</span>
+              </div>
+            </div>
+            <hr className="my-3 border-t border-gray-200" />
+            <p className="font-bold text-right text-indigo-600">
+              Total: Rp{p.total.toLocaleString()}
+            </p>
+          </div>
+        ))}
 
-      <div className="text-center mt-8">
-        <button
-          onClick={() => navigate('/')}
-          className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700"
-        >
-          ← Kembali ke Input
-        </button>
+        <div className="text-center mt-6">
+          <button
+            onClick={() => navigate('/')}
+            className="px-5 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition"
+          >
+            Kembali
+          </button>
+        </div>
       </div>
+
+      <footer className="text-center text-xs text-gray-400 mt-12">
+        by nafih
+      </footer>
     </div>
   );
 }
