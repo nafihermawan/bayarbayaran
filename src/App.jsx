@@ -241,6 +241,21 @@ function App() {
             Hitung Split 💰
           </button>
         </div>
+
+        <div className="max-w-md mx-auto text-center mb-6">
+          <button
+            onClick={() => {
+            setPeserta([]);
+            setPajak('');
+            setBiayaTambahan('');
+            setFormPesanan([]);
+            localStorage.removeItem('splitData');
+          }}
+          className="bg-indigo-600 text-white px-6 py-3 rounded-xl shadow hover:bg-indigo-700 w-full sm:w-auto"
+      >
+          Reset Semua Data 🔄
+          </button>
+        </div>
       </div>
 
       <footer className="text-center text-xs text-gray-400 mt-2 mb-4">
