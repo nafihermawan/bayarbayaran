@@ -6,6 +6,7 @@ function App() {
   const [peserta, setPeserta] = useState([]);
   const [formPesanan, setFormPesanan] = useState([]);
   const [pajak, setPajak] = useState('');
+  const [pajakTipe, setPajakTipe] = useState('persen');
   const [biayaTambahan, setBiayaTambahan] = useState('');
   const navigate = useNavigate();
 
@@ -15,6 +16,7 @@ function App() {
       const parsed = JSON.parse(stored);
       setPeserta(parsed.peserta || []);
       setPajak(parsed.pajak || '');
+      setPajakTipe(parsed.pajakTipe || 'persen');
       setBiayaTambahan(parsed.biayaTambahan || '');
       setFormPesanan((parsed.peserta || []).map(() => ({ namaMenu: '', harga: '' })));
     }
@@ -60,17 +62,48 @@ function App() {
   };
 
   const hitungSplit = () => {
+    let totalMenu = peserta.reduce((sum, p) => {
+      return sum + p.pesanan.reduce((t, item) => t + item.harga, 0);
+    }, 0);
+
+    let totalPajak = 0;
+    if (pajakTipe === 'persen') {
+      totalPajak = (parseFloat(pajak || 0) / 100) * totalMenu;
+    } else {
+      totalPajak = parseFloat(pajak || 0);
+    }
+
+    const totalBiaya = parseFloat(biayaTambahan || 0);
+    const totalPeserta = peserta.length;
+    const pajakPerOrang = totalPeserta ? totalPajak / totalPeserta : 0;
+    const biayaPerOrang = totalPeserta ? totalBiaya / totalPeserta : 0;
+
+    const hasilPeserta = peserta.map(p => {
+      const totalMenu = p.pesanan.reduce((t, item) => t + item.harga, 0);
+      return {
+        ...p,
+        total: totalMenu + pajakPerOrang + biayaPerOrang,
+        rincian: {
+          menu: totalMenu,
+          pajak: pajakPerOrang,
+          biaya: biayaPerOrang
+        }
+      };
+    });
+
     localStorage.setItem('splitData', JSON.stringify({
-      peserta,
+      peserta: hasilPeserta,
       pajak,
-      biayaTambahan
+      pajakTipe,
+      biayaTambahan,
+      totalPajak,
+      totalBiaya
     }));
     navigate('/hasil');
   };
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Sticky Header */}
       <div className="sticky top-0 bg-gray-50 z-10 pt-4 pb-2 shadow-sm">
         <h1 className="text-3xl font-bold text-center text-indigo-600 mb-1">BayarBayaran 🍽️</h1>
         <p className="text-xs italic text-center text-gray-500 max-w-xs mx-auto leading-tight">
@@ -78,9 +111,7 @@ function App() {
         </p>
       </div>
 
-      {/* Main Content */}
       <div className="flex-grow p-4">
-        {/* Tambah Peserta */}
         <div className="max-w-md mx-auto bg-white p-4 rounded-xl shadow mb-6">
           <h2 className="text-lg font-semibold mb-2">Tambah Peserta</h2>
           <div className="flex flex-col sm:flex-row gap-2">
@@ -100,7 +131,6 @@ function App() {
           </div>
         </div>
 
-        {/* Daftar Peserta */}
         {peserta.map((p, index) => (
           <div
             key={index}
@@ -116,7 +146,6 @@ function App() {
               </button>
             </div>
 
-            {/* Daftar Menu */}
             {p.pesanan.length > 0 ? (
               <ul className="mb-3 text-sm text-gray-700">
                 {p.pesanan.map((item, i) => (
@@ -137,12 +166,10 @@ function App() {
               <p className="text-gray-400 text-sm mb-3">Belum ada pesanan.</p>
             )}
 
-            {/* Total */}
             <p className="text-right font-semibold text-sm text-gray-700 mb-2">
               Total: Rp{p.pesanan.reduce((total, item) => total + item.harga, 0).toLocaleString()}
             </p>
 
-            {/* Form Tambah Menu */}
             <div className="flex flex-col sm:flex-row gap-2 text-sm">
               <input
                 type="text"
@@ -176,17 +203,26 @@ function App() {
           </div>
         ))}
 
-        {/* Pajak & Biaya */}
         <div className="max-w-md mx-auto bg-white p-4 rounded-xl shadow-md mb-6">
           <h2 className="text-lg font-semibold mb-2">Pajak & Biaya Tambahan</h2>
           <div className="flex flex-col gap-2">
-            <input
-              type="number"
-              placeholder="Pajak (%)"
-              value={pajak}
-              onChange={(e) => setPajak(e.target.value)}
-              className="border px-3 py-2 rounded"
-            />
+            <div className="flex gap-2">
+              <select
+                value={pajakTipe}
+                onChange={(e) => setPajakTipe(e.target.value)}
+                className="border px-3 py-2 rounded w-28"
+              >
+                <option value="persen">%</option>
+                <option value="nominal">Rp</option>
+              </select>
+              <input
+                type="number"
+                placeholder="Pajak"
+                value={pajak}
+                onChange={(e) => setPajak(e.target.value)}
+                className="flex-1 border px-3 py-2 rounded"
+              />
+            </div>
             <input
               type="number"
               placeholder="Biaya Tambahan"
@@ -197,7 +233,6 @@ function App() {
           </div>
         </div>
 
-        {/* Tombol Hitung */}
         <div className="max-w-md mx-auto text-center mb-6">
           <button
             onClick={hitungSplit}
@@ -208,7 +243,6 @@ function App() {
         </div>
       </div>
 
-      {/* Footer */}
       <footer className="text-center text-xs text-gray-400 mt-2 mb-4">
         by nafih
       </footer>
