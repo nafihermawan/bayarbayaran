@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Analytics } from '@vercel/analytics/react';
 
 function App() {
   const [nama, setNama] = useState('');
@@ -261,6 +262,9 @@ function App() {
       <footer className="text-center text-xs text-gray-400 mt-2 mb-4">
         by nafih
       </footer>
+
+      <Analytics />
+      
     </div>
   );
 }
