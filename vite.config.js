@@ -15,24 +15,24 @@ export default defineConfig({
         theme_color: '#ffffff',
         background_color: '#f9fafb',
         display: 'standalone',
+        start_url: '/',
         icons: [
-  {
-    src: '/icon.png', // pakai slash di depan
-    sizes: '192x192',
-    type: 'image/png',
-  },
-  {
-    src: '/icon.png',
-    sizes: '512x512',
-    type: 'image/png',
-  },
-  {
-    src: '/icon.svg',
-    sizes: 'any',
-    type: 'image/svg+xml',
-    purpose: 'any maskable'
-  }
-]
+          {
+            src: '/icon.png',
+            sizes: '842x814',
+            type: 'image/png',
+            purpose: 'any'
+          },
+          {
+            src: '/icon.svg',
+            sizes: 'any',
+            type: 'image/svg+xml',
+            purpose: 'any maskable'
+          }
+        ]
+      },
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg}']
       }
     })
   ]
