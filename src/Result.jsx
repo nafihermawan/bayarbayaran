@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-function Result() {
+export default function Result() {
   const [data, setData] = useState(null);
   const navigate = useNavigate();
 
@@ -19,7 +19,10 @@ function Result() {
   const totalPesanan = data.peserta.reduce((sum, p) => sum + p.rincian.menu, 0);
   const totalPajak = data.peserta.reduce((sum, p) => sum + p.rincian.pajak, 0);
   const totalBiaya = data.peserta.reduce((sum, p) => sum + p.rincian.biaya, 0);
+  const diskon = parseFloat(data.diskon || 0);
   const totalKeseluruhan = data.peserta.reduce((sum, p) => sum + p.total, 0);
+  const totalSetelahDiskon = totalKeseluruhan - diskon;
+  const diskonPerOrang = data.peserta.length > 0 ? diskon / data.peserta.length : 0;
 
   return (
     <div className="min-h-screen bg-white py-6 px-4 text-gray-800">
@@ -40,10 +43,16 @@ function Result() {
             <span>Biaya tambahan</span>
             <strong>Rp{totalBiaya.toLocaleString()}</strong>
           </div>
+          {diskon > 0 && (
+            <div className="flex justify-between mb-1">
+              <span>Diskon</span>
+              <strong>- Rp{diskon.toLocaleString()}</strong>
+            </div>
+          )}
           <hr className="my-2 border-t border-yellow-300" />
           <div className="flex justify-between mt-2 font-semibold">
             <span>Total akhir</span>
-            <strong>Rp{totalKeseluruhan.toLocaleString()}</strong>
+            <strong>Rp{totalSetelahDiskon.toLocaleString()}</strong>
           </div>
         </div>
 
@@ -74,10 +83,16 @@ function Result() {
                 <span>Biaya Tambahan</span>
                 <span>Rp{p.rincian.biaya.toLocaleString()}</span>
               </div>
+              {diskon > 0 && (
+                <div className="flex justify-between">
+                  <span>Diskon</span>
+                  <span>- Rp{diskonPerOrang.toLocaleString()}</span>
+                </div>
+              )}
             </div>
             <hr className="my-3 border-t border-gray-200" />
             <p className="font-bold text-right text-indigo-600">
-              Total: Rp{p.total.toLocaleString()}
+              Total: Rp{(p.total - diskonPerOrang).toLocaleString()}
             </p>
           </div>
         ))}
@@ -98,5 +113,3 @@ function Result() {
     </div>
   );
 }
-
-export default Result;

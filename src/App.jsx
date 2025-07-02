@@ -9,6 +9,7 @@ function App() {
   const [pajak, setPajak] = useState('');
   const [pajakTipe, setPajakTipe] = useState('persen');
   const [biayaTambahan, setBiayaTambahan] = useState('');
+  const [diskon, setDiskon] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -19,6 +20,7 @@ function App() {
       setPajak(parsed.pajak || '');
       setPajakTipe(parsed.pajakTipe || 'persen');
       setBiayaTambahan(parsed.biayaTambahan || '');
+      setDiskon(parsed.diskon || '');
       setFormPesanan((parsed.peserta || []).map(() => ({ namaMenu: '', harga: '' })));
     }
   }, []);
@@ -98,7 +100,8 @@ function App() {
       pajakTipe,
       biayaTambahan,
       totalPajak,
-      totalBiaya
+      totalBiaya,
+      diskon
     }));
     navigate('/hasil');
   };
@@ -224,11 +227,26 @@ function App() {
                 className="flex-1 border px-3 py-2 rounded"
               />
             </div>
+
+            <label className="block text-xs text-gray-600 mb-px" htmlFor="diskon">
+            Nominal Biaya Tambahan (Opsional)
+            </label>
             <input
               type="number"
-              placeholder="Biaya Tambahan"
+              placeholder="Masukan biaya tambahan"
               value={biayaTambahan}
               onChange={(e) => setBiayaTambahan(e.target.value)}
+              className="border px-3 py-2 rounded"
+            />
+          
+            <label className="block text-xs text-gray-600 mb-px" htmlFor="diskon">
+            Nominal Diskon (Opsional)
+            </label>
+            <input
+              type="number"
+              placeholder="Masukan diskon"
+              value={diskon}
+              onChange={(e) => setDiskon(e.target.value)}
               className="border px-3 py-2 rounded"
             />
           </div>
@@ -250,6 +268,7 @@ function App() {
             setPajak('');
             setBiayaTambahan('');
             setFormPesanan([]);
+            setDiskon('');
             localStorage.removeItem('splitData');
           }}
           className="bg-indigo-600 text-white px-6 py-3 rounded-xl shadow hover:bg-indigo-700 w-full sm:w-auto"
